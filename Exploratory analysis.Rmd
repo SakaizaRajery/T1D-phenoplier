@@ -25,29 +25,61 @@ gls_phenomexcan <- readRDS("data/gls/gls-summary-phenomexcan.rds")
 gls_emerge <- readRDS("data/gls/gls-summary-emerge.rds")
 ```
 
-#filter LVs associated with T1D in phenomexcan
+#filter LVs associated with T1D in phenomexcan and emerge
 ```{r}
 #987 LVs
-phe_T1D_LVs <- gls_phenomexcan[gls_phenomexcan$phenotype_desc %in% traits,]
+phe_T1D_LVs <- gls_phenomexcan[gls_phenomexcan$phenotype_desc %in% UK_biobank_traits,]
+e_T1D_LVs <- gls_emerge[gls_emerge$phenotype_desc %in% emerge_trait,]
+
+
+#122
+phe_T1D_LVs_nom_0.01 <- phe_T1D_LVs[phe_T1D_LVs$pvalue < 0.01,]
+#19
+e_T1D_LVs_nom_0.01 <- e_T1D_LVs[e_T1D_LVs$pvalue < 0.01, ]
+#17
+phe_U_e_nom_0.01 <- inner_join(phe_T1D_LVs_nom_0.01,e_T1D_LVs_nom_0.01, by = "lv")
+length(unique(phe_U_e_nom_0.01$lv))
+
+#18
+phe_T1D_LVs_0.10 <- phe_T1D_LVs[phe_T1D_LVs$fdr < 0.10, ]
+#4
+e_T1D_LVs_0.10 <- e_T1D_LVs[e_T1D_LVs$fdr < 0.10, ]
+#2 LV 913 and LV 71
+phe_U_e_0.1 <- inner_join(phe_T1D_LVs_0.10,e_T1D_LVs_0.10, by = "lv")
+length(unique(phe_U_e_0.1$lv))
+
+#13
+phe_T1D_LVs_0.05 <- phe_T1D_LVs[phe_T1D_LVs$fdr < 0.05, ]
+#2
+e_T1D_LVs_0.05 <- e_T1D_LVs[e_T1D_LVs$fdr < 0.05, ]
+#1 LV 913
+phe_U_e_0.05 <- inner_join(phe_T1D_LVs_0.05,e_T1D_LVs_0.05, by = "lv")
+length(unique(phe_U_e_0.05$lv))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+#filter LVs associated with T1D in emerge
+```{R}
+
 phe_T1D_LVs$pass_FDR <- ifelse(phe_T1D_LVs$fdr < 0.05, "Pass_0.05",
                              ifelse(phe_T1D_LVs$fdr>=0.05&phe_T1D_LVs$fdr <0.10,"Pass_0.10","FAIL"))
 
 ggplot(phe_T1D_LVs, aes(as.factor(phenotype), y = pvalue, color = pass_FDR))+
   geom_jitter()
 
-#122
-phe_T1D_LVs_nom_0.01 <- phe_T1D_LVs[phe_T1D_LVs$pvalue < 0.01,]
-
-#18
-phe_T1D_LVs_0.10 <- phe_T1D_LVs[phe_T1D_LVs$fdr < 0.10, ]
-
-#13
-phe_T1D_LVs_0.05 <- phe_T1D_LVs[phe_T1D_LVs$fdr < 0.05, ]
-
-```
-
-#filter LVs associated with T1D in emerge
-```{R}
 #987 LVs associated with T1D
 e_T1D_LVs <- gls_emerge[gls_emerge$phenotype_desc %in% emerge_trait,]
 
